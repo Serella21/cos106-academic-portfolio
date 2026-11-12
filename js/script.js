@@ -1,6 +1,5 @@
 
-// ACADEMIC PLANNER
-// ======================================
+// Academic Planner
 
 const taskForm = document.getElementById("taskForm");
 const taskInput = document.getElementById("taskInput");
