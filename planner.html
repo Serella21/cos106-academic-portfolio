@@ -4,14 +4,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Academic Planner | Ayomide Shoyombo</title>
+
     <link rel="stylesheet" href="css/style.css">
+
     <style>
-        .planner-frame {
-            width: 100%;
-            height: 850px;
+        .planner-container {
+            max-width: 850px;
+            margin: 65px auto;
+            padding: 0 25px;
+            min-height: 65vh;
+        }
+
+        .planner-tag {
+            color: #e87540;
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 14px;
+        }
+
+        .planner-container h1 {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+
+        .planner-subtitle {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .task-form {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 35px;
+        }
+
+        .task-form input {
+            flex: 1;
+            min-width: 0;
+            padding: 15px;
+            border: 1px solid #d9d9d2;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .add-btn {
+            background: #174d3b;
+            color: white;
+            padding: 0 24px;
             border: none;
-            border-radius: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .add-btn:hover {
+            background: #103b2d;
+        }
+
+        .planner-container h2 {
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .task {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 5px;
+            border-bottom: 1px solid #deded7;
+        }
+
+        .task input[type="checkbox"] {
+            width: 17px;
+            height: 17px;
+            accent-color: #174d3b;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .task span {
+            flex: 1;
+            overflow-wrap: anywhere;
+            line-height: 1.5;
+        }
+
+        .task.completed span {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .delete-btn {
+            background: #f5e3dc;
+            color: #b83e25;
+            padding: 9px 13px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background: #f0d3c8;
+        }
+
+        .empty {
+            color: #888;
+            padding: 20px 0;
+        }
+
+        @media (max-width: 600px) {
+            .planner-container {
+                margin: 45px auto;
+            }
+
+            .planner-container h1 {
+                font-size: 29px;
+            }
+
+            .task-form {
+                flex-direction: column;
+            }
+
+            .add-btn {
+                padding: 15px;
+            }
         }
     </style>
 </head>
@@ -30,29 +148,142 @@
     </nav>
 </header>
 
-<main>
-    <section class="welcome-section">
-        <p class="eyebrow">STUDENT PRODUCTIVITY</p>
-        <h2>My Academic Planner</h2>
-        <p>
-            A simple tool designed to help students organise
-            academic activities, track tasks and stay productive.
-        </p>
-    </section>
+<main class="planner-container">
 
-    <section>
-        <iframe
-            class="planner-frame"
-            src="https://serella21.github.io/academic-planner/"
-            title="Student Academic Planner">
-        </iframe>
-    </section>
+    <p class="planner-tag">STAY ORGANISED / STAY FOCUSED</p>
+
+    <h1>My Academic Planner</h1>
+
+    <p class="planner-subtitle">
+        Keep track of your learning activities, deadlines
+        and assignments. Stay organised and make progress
+        towards your academic goals.
+    </p>
+
+    <form class="task-form" id="taskForm">
+
+        <input
+            type="text"
+            id="taskInput"
+            placeholder="Enter a new task..."
+            required
+        >
+
+        <button class="add-btn" type="submit">
+            Add Task +
+        </button>
+
+    </form>
+
+    <h2>My Tasks</h2>
+
+    <div id="taskList"></div>
+
 </main>
 
 <footer class="site-footer">
     <p>© 2026 Ayomide Shoyombo</p>
     <p>COS 106 – Introduction to Web Technologies.</p>
 </footer>
+
+<script>
+
+const taskForm = document.getElementById("taskForm");
+const taskInput = document.getElementById("taskInput");
+const taskList = document.getElementById("taskList");
+
+let tasks = JSON.parse(
+    localStorage.getItem("portfolioAcademicTasks")
+) || [];
+
+function saveTasks() {
+    localStorage.setItem(
+        "portfolioAcademicTasks",
+        JSON.stringify(tasks)
+    );
+}
+
+function renderTasks() {
+
+    taskList.innerHTML = "";
+
+    if (tasks.length === 0) {
+        taskList.innerHTML =
+            '<p class="empty">No tasks yet. Add your first task!</p>';
+        return;
+    }
+
+    tasks.forEach((task, index) => {
+
+        const row = document.createElement("div");
+
+        row.className = "task" +
+            (task.completed ? " completed" : "");
+
+        const checkbox = document.createElement("input");
+
+        checkbox.type = "checkbox";
+        checkbox.checked = task.completed;
+
+        checkbox.addEventListener("change", () => {
+
+            tasks[index].completed = checkbox.checked;
+
+            saveTasks();
+            renderTasks();
+
+        });
+
+        const text = document.createElement("span");
+
+        text.textContent = task.name;
+
+        const deleteButton = document.createElement("button");
+
+        deleteButton.className = "delete-btn";
+        deleteButton.textContent = "Delete";
+
+        deleteButton.addEventListener("click", () => {
+
+            tasks.splice(index, 1);
+
+            saveTasks();
+            renderTasks();
+
+        });
+
+        row.append(checkbox, text, deleteButton);
+
+        taskList.appendChild(row);
+
+    });
+
+}
+
+taskForm.addEventListener("submit", (event) => {
+
+    event.preventDefault();
+
+    const name = taskInput.value.trim();
+
+    if (!name) return;
+
+    tasks.push({
+        name: name,
+        completed: false
+    });
+
+    saveTasks();
+    renderTasks();
+
+    taskInput.value = "";
+    taskInput.focus();
+
+});
+
+renderTasks();
+
+</script>
 
 </body>
 </html>
